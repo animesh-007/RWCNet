@@ -5,7 +5,7 @@ After following the original instructions of RWCNet code for setting up the envi
 ```
 python get_dataset_min_max.py <path_to_dataset_images_folder>
 ```
-2. After getting the `dest_min` and `dset_max` values, I used the following command to train the model:
+2. After getting the `dest_min` and `dset_max` values, add the new values in the train config file of the dataset. After this, I used the following command to train the model:
 ```
 python l2r_train_eval.py <path_to_dataset_json_file> <train_config_json_file_of_dataset>
 ```
