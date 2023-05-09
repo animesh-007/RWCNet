@@ -3,7 +3,7 @@
         {
             "res_factor": 4,
             "patch_factor": 4,
-            "checkpoint": "./train_oasis/stage1.pth",
+            "checkpoint": "/home/mvision/working_dir/RWCNet/redoOASIS_v3_110/checkpoints/stage1/rnn4x_15000.pth",
             "iters": 12,
             "search_range": 3,
             "diffeomorphic": true
@@ -11,7 +11,7 @@
         {
             "res_factor": 2,
             "patch_factor": 4,
-            "checkpoint": "./train_oasis/stage2.pth",
+            "checkpoint": "/home/mvision/working_dir/RWCNet/redoOASIS_v3_110/checkpoints/stage2/rnn2x_20000.pth",
             "iters": 12,
             "search_range": 3,
             "diffeomorphic": true
@@ -28,7 +28,7 @@
     "dset_max": 1,
     "dset_min": 0,
     "instance_opt_res": 2,
-    "save_path": "./oasis_val4",
+    "save_path": "./oasis_val5",
     "split": "val",
     "eval_at_each_stage": true
 }

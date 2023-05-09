@@ -95,6 +95,9 @@ class EvalDataset(Dataset):
             ret["fixed_mask"] = fixed_mask
             ret["moving_mask"] = moving_mask
 
+            ret["fixed_spacing"] = torch.Tensor(get_spacing(fixed_nib))
+            ret["moving_spacing"] = torch.Tensor(get_spacing(moving_nib))
+
         if "fixed_keypoints" in data:
             fixed_kps = load_keypoints(data["fixed_keypoints"])
             moving_kps = load_keypoints(data["moving_keypoints"])
@@ -229,6 +232,8 @@ def evaluate(data, flow_agg, fixed_res, moving_res, res, std_out: bool=False):
     mi_loss = MSE()(fixed_res, moving_res)
     metrics["MSE"] = mi_loss.item()
 
+    # import pdb; pdb.set_trace()
+    
     if "fixed_keypoints" in data:
         fixed_kps = data["fixed_keypoints"] / res
         moving_kps = data["moving_keypoints"] / res
@@ -240,6 +245,18 @@ def evaluate(data, flow_agg, fixed_res, moving_res, res, std_out: bool=False):
             moving_spacing=data["moving_spacing"].squeeze(0),
         )
         metrics["TRE"] = tre_loss.item()
+
+    # if "fixed_mask" in data:
+    #     fixed_kps = data["fixed_mask"] / res
+    #     moving_kps = data["moving_mask"] / res
+    #     tre_loss = res * TotalRegistrationLoss()(
+    #         fixed_landmarks=fixed_kps.squeeze(0),
+    #         moving_landmarks=moving_kps.squeeze(0),
+    #         displacement_field=flow_agg,
+    #         fixed_spacing=data["fixed_spacing"].squeeze(0),
+    #         moving_spacing=data["moving_spacing"].squeeze(0),
+    #     )
+    #     metrics["TRE"] = tre_loss.item()
 
     if "fixed_segmentation" in data:
         fixed_seg = (
@@ -264,6 +281,7 @@ def evaluate(data, flow_agg, fixed_res, moving_res, res, std_out: bool=False):
         moving_seg = F.interpolate(
             moving_seg, tuple(s // res for s in moving_seg.shape[-3:]), mode="nearest"
         )
+        # import pdb; pdb.set_trace()
         dice_loss = DiceLoss()(
             fixed_seg.to(flow_agg.device), moving_seg.to(flow_agg.device), flow_agg
         )
@@ -305,12 +323,14 @@ def eval(data_json: Path, eval_config: Path):
         )
 
         for stage in config.stages:
+            # print(stage)
             r = stage.res_factor
             p = stage.patch_factor
             res_shape = tuple(s // r for s in fixed.shape[-3:])
             fixed_res = F.interpolate(fixed, res_shape).to(config.device)
             moving_res = F.interpolate(moving, res_shape).to(config.device)
 
+            
             if flow_agg is not None:
                 up_factor = res_shape[-1] / flow_agg.shape[-1]
                 flow_agg = F.interpolate(flow_agg, res_shape) * up_factor
@@ -327,6 +347,9 @@ def eval(data_json: Path, eval_config: Path):
                     search_range=stage.search_range,
                     diffeomorphic=stage.diffeomorphic,
                 )
+            # print(model)
+            # print(f"Loading checkpoint {stage.checkpoint}")
+            # print("stage", stage)
             model.load_state_dict(torch.load(stage.checkpoint))
             model = model.eval().to(config.device)
             if r == p:
@@ -358,7 +381,8 @@ def eval(data_json: Path, eval_config: Path):
             del fixed_res, moving_res, model
 
         assert flow_agg is not None
-        image_metrics = evaluate(data, flow_agg, fixed, moving, 1)
+        # image_metrics = evaluate(data, flow_agg, fixed, moving, 1)
+        image_metrics = evaluate(data, flow_agg, fixed, moving, r)
         dataset_metrics[i]["fixed"] = str(data["fixed_name"])
         dataset_metrics[i]["moving"] = str(data["moving_name"])
         dataset_metrics[i]["metrics"] = image_metrics

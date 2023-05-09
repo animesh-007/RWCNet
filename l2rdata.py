@@ -55,6 +55,7 @@ def get_split_pairs_from_paired_dataset(data: Dict, root: Path):
             (k if k != "label" else "segmentation"): str(root / v)
             for k, v in dat.items()
         }
+        # import pdb; pdb.set_trace()
 
     for dat in data["test"]:
         test_data[dat["image"]] = {
@@ -70,6 +71,7 @@ def get_split_pairs_from_paired_dataset(data: Dict, root: Path):
             pair_dat = {}
             for lab in ["fixed", "moving"]:
                 image = dat[lab]
+                # import pdb; pdb.set_trace()
                 if image in train_data:
                     all_dat_for_image = train_data[image]
                     pair_dat.update(
@@ -173,17 +175,25 @@ def get_split_pairs_from_hybrid_dataset(data: Dict, root: Path):
     train_data = {}
     test_data = {}
     split_data = defaultdict(list)
-    for dat in data["training"]:
-        train_data[dat["image"]] = {
-            (k if k != "label" else "segmentation"): str(root / v)
-            for k, v in dat.items()
-        }
+    for k,v in data["training"].items():
+        # import pdb; pdb.set_trace()
+        print(f"working on {k}")
+        for dat in v:
+            train_data[dat["image"]] = {
+                (k if k != "label" else "segmentation"): str(root / v)
+                for k, v in dat.items()
+            }
 
-    for dat in data["test"]:
-        test_data[dat["image"]] = {
-            (k if k != "label" else "segmentation"): str(root / v)
-            for k, v in dat.items()
-        }
+    
+    for k,v in data["test"].items():
+        # import pdb; pdb.set_trace()
+        print(f"working on {k}")
+        for dat in v:
+        # for dat in data["test"]:
+            test_data[dat["image"]] = {
+                (k if k != "label" else "segmentation"): str(root / v)
+                for k, v in dat.items()
+            }
 
     val_images = []
     for dat in data[f"registration_val"]:
@@ -203,8 +213,9 @@ def get_split_pairs_from_hybrid_dataset(data: Dict, root: Path):
     train_paired_images = []
     for dat in data[f"training_paired_images"]:
         pair_dat = {}
-        for lab in ("fixed", "moving"):
-            image = dat[lab]
+        for lab, k in zip(["fixed", "moving"], ["0", "1"]):
+            # image = dat[lab]
+            image = dat[k]
             train_paired_images.append(image)
             if image in train_data:
                 all_dat_for_image = train_data[image]
@@ -215,7 +226,7 @@ def get_split_pairs_from_hybrid_dataset(data: Dict, root: Path):
         else:
             split_data["train"].append(pair_dat)
 
-    train_paired_images = train_paired_images.extend(val_images)
+    train_paired_images.extend(val_images)
     train_images = [
         train_data[k] for k in train_data.keys() if k not in train_paired_images
     ]
@@ -224,8 +235,9 @@ def get_split_pairs_from_hybrid_dataset(data: Dict, root: Path):
 
     for dat in data[f"test_paired_images"]:
         pair_dat = {}
-        for lab in ("fixed", "moving"):
-            image = dat[lab]
+        for lab, k in zip(["fixed", "moving"], ["0", "1"]):
+            # image = dat[lab]
+            image = dat[k]
             if image in train_data:
                 all_dat_for_image = train_data[image]
                 pair_dat.update({f"{lab}_{k}": v for k, v in all_dat_for_image.items()})

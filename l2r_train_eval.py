@@ -75,6 +75,7 @@ def main(dataset_json: Path, config_json: Path):
 
     check_data(data)
     root = dataset_json.parent
+    # import pdb; pdb.set_trace()
     split_pairs  = get_split_pairs(data, root)
 
     checkpointroot = Path("checkpoints")
@@ -96,7 +97,7 @@ def main(dataset_json: Path, config_json: Path):
 
     if not data_json.exists():
         with open(data_json, "w") as f:
-            json.dump(split_pairs, f)
+            json.dump(split_pairs, f, indent=4)
 
     start = 0 if resumption_point is None else resumption_point.stage-1
     for i, stage in enumerate(config.stages[start:], start=start):

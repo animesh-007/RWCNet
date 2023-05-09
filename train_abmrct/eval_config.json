@@ -1,0 +1,18 @@
+{
+    "stages": [
+        {
+            "res_factor": 4,
+            "patch_factor": 4,
+            "checkpoint": "/home/mvision/working_dir/RWCNet/redoADMRCT_v3_117/checkpoints/stage1/rnn4x_15000.pth",
+            "iters": 12,
+            "search_range": 3,
+            "diffeomorphic": true
+        }
+    ],
+    "dset_max": 4000,
+    "dset_min": -4000,
+    "instance_opt_res": 2,
+    "save_path": "./ab_mrct_val_v1",
+    "split": "val",
+    "eval_at_each_stage": true
+}

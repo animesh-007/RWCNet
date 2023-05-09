@@ -27,6 +27,12 @@ class DiceLoss(nn.Module):
 
     def forward(self, fixed_seg: torch.Tensor, moving_seg: torch.Tensor, flow: torch.Tensor):
         labels = fixed_seg.unique()
+        # print(labels)
+
+        if len(labels) < 2:
+            dice =  torch.Tensor([0]).to(device=fixed_seg.device)
+            dice.requires_grad_()
+            return 1 - dice
 
         fsegs, msegs = [], []
 
@@ -104,6 +110,10 @@ class TotalRegistrationLoss(nn.Module):
         #enforce that coords must fall inside displacement grid
         u = torch.tensor([[displacement_field.shape[2]-1, displacement_field.shape[3]-1, displacement_field.shape[4]-1]]).to(displacement_field.device)
         l = torch.tensor([[0, 0, 0]]).to(displacement_field.device)
+
+        # import pdb; pdb.set_trace()
+        # u = u.repeat(fixed_landmarks.shape[0], 1)
+
         fcoords = torch.max(torch.min(fcoords, u), l)
         ccoords = torch.max(torch.min(ccoords, u), l)
 
